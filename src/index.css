@@ -5,6 +5,8 @@
 
 body {
   background: #EAEBEC;
+  margin: 0;
+  font: 100 14px 'Roboto';
 }
 
 .container {
@@ -32,6 +34,10 @@ body {
   color: #727B86;
   font-size: 21px;
   padding-bottom: 10px;
+  height: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border-bottom: dotted 1px;
 }
 
