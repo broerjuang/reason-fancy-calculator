@@ -1,48 +1,188 @@
 let text = ReasonReact.stringToElement;
 
-let component = ReasonReact.statelessComponent("App");
+type state = {
+  total: float,
+  lastCalculation: float,
+  input: string,
+  operation: string,
+  allClear: bool
+};
+
+type action =
+  | AllClear
+  | Clear
+  | UpdatedField(string)
+  | Sum
+  | Substract
+  | Devide
+  | Multiply
+  | Equals
+  | Decimals
+  | Negate
+  | Percent;
+
+let initialState = {total: 0., lastCalculation: 0., input: "", operation: "", allClear: true};
+
+let parseFloat = (str) =>
+  try (float_of_string(str)) {
+  | _ => 0.
+  };
+
+/* Operation */
+let sum = (x, y) => x +. y;
+
+let multiply = (x, y) => x *. y;
+
+let division = (x, y) => x /. y;
+
+let substraction = (x, y) => x -. y;
+
+let negate = (x) => x *. (-1.);
+
+let isInputEmpty = ({input}) => input === "";
+
+let isTotalZero = ({total}) => total === 0.;
+
+let component = ReasonReact.reducerComponent("App");
 
 let make = (_children) => {
   ...component,
-  render: (_self) =>
+  initialState: () => initialState,
+  reducer: (action, state) =>
+    switch action {
+    | AllClear => ReasonReact.Update(initialState)
+    | Clear =>
+      let total = isInputEmpty(state) ? 0. : state.total;
+      ReasonReact.Update({...state, operation: "", input: "", total, allClear: true})
+    | UpdatedField(str) => ReasonReact.Update({...state, input: state.input ++ str})
+    | Percent =>
+      let input = ! isInputEmpty(state) ? state.input |> parseFloat |> string_of_float : "";
+      let total = isInputEmpty(state) ? state.total /. 100. : state.total;
+      ReasonReact.Update({...state, input, total})
+    | Negate =>
+      let total = state.input === "" ? (-1.) *. state.total : state.total;
+      let input =
+        ! isInputEmpty(state) ?
+          state.input |> parseFloat |> negate |> string_of_float : state.input;
+      ReasonReact.Update({...state, input, total})
+    | Decimals =>
+      let total = isInputEmpty(state) && isTotalZero(state) ? 0. : state.total;
+      let input =
+        isInputEmpty(state) && isTotalZero(state) ?
+          ".0" : state.input !== "" ? state.input ++ "." : state.input;
+      ReasonReact.Update({...state, input, total})
+    | Sum =>
+      ReasonReact.Update({
+        ...state,
+        operation: "Sum",
+        total: state.total +. parseFloat(state.input),
+        input: ""
+      })
+    | Substract =>
+      let total =
+        if (! isInputEmpty(state) && ! isTotalZero(state)) {
+          state.total -. parseFloat(state.input)
+        } else if (isInputEmpty(state) && ! isTotalZero(state)) {
+          state.total
+        } else {
+          parseFloat(state.input)
+        };
+      ReasonReact.Update({...state, operation: "Substract", total, input: ""})
+    | Multiply =>
+      let total =
+        if (! isInputEmpty(state)) {
+          parseFloat(state.input)
+        } else if (! isTotalZero(state) && ! isInputEmpty(state)) {
+          state.total *. parseFloat(state.input)
+        } else {
+          state.lastCalculation
+        };
+      ReasonReact.Update({...state, operation: "Multiply", total, input: ""})
+    | Devide =>
+      let total =
+        if (! isInputEmpty(state)) {
+          parseFloat(state.input)
+        } else if (! isTotalZero(state) && ! isInputEmpty(state)) {
+          state.total /. parseFloat(state.input)
+        } else {
+          state.lastCalculation
+        };
+      ReasonReact.Update({...state, operation: "Devide", total, input: ""})
+    | Equals =>
+      switch state.operation {
+      | "Sum" =>
+        ReasonReact.Update({
+          ...state,
+          operation: "",
+          total: state.total +. parseFloat(state.input),
+          lastCalculation: state.total +. parseFloat(state.input),
+          input: ""
+        })
+      | "Substract" =>
+        ReasonReact.Update({
+          ...state,
+          total: state.total -. parseFloat(state.input),
+          operation: "",
+          lastCalculation: state.total -. parseFloat(state.input),
+          input: ""
+        })
+      | "Multiply" =>
+        ReasonReact.Update({
+          ...state,
+          total: state.total *. parseFloat(state.input),
+          lastCalculation: state.total *. parseFloat(state.input),
+          input: ""
+        })
+      | "Devide" =>
+        ReasonReact.Update({
+          ...state,
+          operation: "",
+          total: state.total /. parseFloat(state.input),
+          lastCalculation: state.total /. parseFloat(state.input),
+          input: ""
+        })
+      | _ => ReasonReact.NoUpdate
+      }
+    },
+  render: ({send, state}) =>
     <div className="container">
       <div className="calc-body">
         <div className="calc-screen">
-          <div className="calc-operation"> (text @@ "2536 + 419 +") </div>
+          <div className="calc-operation"> (text @@ state.input) </div>
           <div className="calc-typed">
-            (text @@ "2955")
+            (text @@ (state.total |> string_of_float))
             <span className="blink-me"> (text @@ "_") </span>
           </div>
         </div>
         <div className="calc-button-row">
-          <div className="button c"> ("C" |> text) </div>
-          <div className="button l"> ("^" |> text) </div>
-          <div className="button l"> ("%" |> text) </div>
-          <div className="button l"> ("/" |> text) </div>
+          <div className="button c" onClick=((_e) => send(Clear))> ("C" |> text) </div>
+          <div className="button c" onClick=((_e) => send(AllClear))> ("CE" |> text) </div>
+          <div className="button l" onClick=((e) => send(Percent))> ("%" |> text) </div>
+          <div className="button l" onClick=((_e) => send(Devide))> ("/" |> text) </div>
         </div>
         <div className="calc-button-row">
-          <div className="button"> ("7" |> text) </div>
-          <div className="button"> ("8" |> text) </div>
-          <div className="button"> ("9" |> text) </div>
-          <div className="button l"> ("x" |> text) </div>
+          <div className="button" onClick=((_e) => send(UpdatedField("7")))> ("7" |> text) </div>
+          <div className="button" onClick=((_e) => send(UpdatedField("8")))> ("8" |> text) </div>
+          <div className="button" onClick=((_e) => send(UpdatedField("9")))> ("9" |> text) </div>
+          <div className="button l" onClick=((_e) => send(Multiply))> ("x" |> text) </div>
         </div>
         <div className="calc-button-row">
-          <div className="button"> ("4" |> text) </div>
-          <div className="button"> ("5" |> text) </div>
-          <div className="button"> ("6" |> text) </div>
-          <div className="button l"> ("-" |> text) </div>
+          <div className="button" onClick=((_e) => send(UpdatedField("4")))> ("4" |> text) </div>
+          <div className="button" onClick=((_e) => send(UpdatedField("5")))> ("5" |> text) </div>
+          <div className="button" onClick=((_e) => send(UpdatedField("6")))> ("6" |> text) </div>
+          <div className="button l" onClick=((_e) => send(Substract))> ("-" |> text) </div>
         </div>
         <div className="calc-button-row">
-          <div className="button"> ("1" |> text) </div>
-          <div className="button"> ("2" |> text) </div>
-          <div className="button"> ("3" |> text) </div>
-          <div className="button l"> ("+" |> text) </div>
+          <div className="button" onClick=((_e) => send(UpdatedField("1")))> ("1" |> text) </div>
+          <div className="button" onClick=((_e) => send(UpdatedField("2")))> ("2" |> text) </div>
+          <div className="button" onClick=((_e) => send(UpdatedField("3")))> ("3" |> text) </div>
+          <div className="button l" onClick=((e) => send(Sum))> ("+" |> text) </div>
         </div>
         <div className="calc-button-row">
-          <div className="button"> ("." |> text) </div>
-          <div className="button"> ("0" |> text) </div>
-          <div className="button"> ({js|±|js} |> text) </div>
-          <div className="button l"> ("=" |> text) </div>
+          <div className="button" onClick=((_e) => send(Decimals))> ("." |> text) </div>
+          <div className="button" onClick=((_e) => send(UpdatedField("0")))> ("0" |> text) </div>
+          <div className="button" onClick=((_e) => send(Negate))> ({js|±|js} |> text) </div>
+          <div className="button l" onClick=((_e) => send(Equals))> ("=" |> text) </div>
         </div>
       </div>
     </div>
