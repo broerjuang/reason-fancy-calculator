@@ -1,23 +1,24 @@
 # Implementation of simple calculator using Reason ML
 
 
-This calculator app is made by me to learn `Reason ML` by exercising my muscle memory stick with its syntax and semantics. Most of the code that I have written is only rewritten of `elm` version of [chrisbuttery / elm-calculator] (https://github.com/chrisbuttery/elm-calculator), and css is implemented using [kalpeshsingh] (https: //codepen.io/kalpeshsingh/pen/wMNpLp).
+This calculator app is made by me to learn `Reason ML` by exercising my muscle memory stick with its syntax and semantics. Most of the code that I have written is only rewritten of `elm` version of [chrisbuttery / elm-calculator](https://github.com/chrisbuttery/elm-calculator), and css is implemented using [kalpeshsingh](https://codepen.io/kalpeshsingh/pen/wMNpLp).
 
 
+![image-yeay](https://github.com/broerjuang/reason-fancy-calculator/blob/master/screenshot.png)
 
 Go and calculate with it!
-[Reason-Calculator] (reason-fancy-calculator.surge.sh)
+[Reason-Calculator](http://reason-fancy-calculator.surge.sh/)
 
 ## How to start
 
-`` shell`
+``` shell
 
-$> git clone [this repo]
-$> cd reason-calculator
-$> yarn install
-$> yarn start
+> git clone https://github.com/broerjuang/reason-fancy-calculator
+> cd reason-calculator
+> yarn install
+> yarn start
 
-`` `
+```
 
 ## Impression
 
