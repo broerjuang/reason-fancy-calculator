@@ -157,7 +157,7 @@ let make = (_children) => {
         <div className="calc-button-row">
           <div className="button c" onClick=((_e) => send(Clear))> ("C" |> text) </div>
           <div className="button c" onClick=((_e) => send(AllClear))> ("CE" |> text) </div>
-          <div className="button l" onClick=((e) => send(Percent))> ("%" |> text) </div>
+          <div className="button l" onClick=((_e) => send(Percent))> ("%" |> text) </div>
           <div className="button l" onClick=((_e) => send(Devide))> ("/" |> text) </div>
         </div>
         <div className="calc-button-row">
@@ -176,7 +176,7 @@ let make = (_children) => {
           <div className="button" onClick=((_e) => send(UpdatedField("1")))> ("1" |> text) </div>
           <div className="button" onClick=((_e) => send(UpdatedField("2")))> ("2" |> text) </div>
           <div className="button" onClick=((_e) => send(UpdatedField("3")))> ("3" |> text) </div>
-          <div className="button l" onClick=((e) => send(Sum))> ("+" |> text) </div>
+          <div className="button l" onClick=((_e) => send(Sum))> ("+" |> text) </div>
         </div>
         <div className="calc-button-row">
           <div className="button" onClick=((_e) => send(Decimals))> ("." |> text) </div>
