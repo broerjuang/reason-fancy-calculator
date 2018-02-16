@@ -1,10 +1,16 @@
 let text = ReasonReact.stringToElement;
 
+type operation = 
+  | Op_None
+  | Op_Sum
+  | Op_Substract
+  | Op_Multiply
+  | Op_Devide; /* Should be divide? */
 type state = {
   total: float,
   lastCalculation: float,
   input: string,
-  operation: string,
+  operation,
   allClear: bool
 };
 
@@ -21,7 +27,7 @@ type action =
   | Negate
   | Percent;
 
-let initialState = {total: 0., lastCalculation: 0., input: "", operation: "", allClear: true};
+let initialState = {total: 0., lastCalculation: 0., input: "", operation: Op_None, allClear: true};
 
 let parseFloat = (str) =>
   try (float_of_string(str)) {
@@ -53,7 +59,7 @@ let make = (_children) => {
     | AllClear => ReasonReact.Update(initialState)
     | Clear =>
       let total = isInputEmpty(state) ? 0. : state.total;
-      ReasonReact.Update({...state, operation: "", input: "", total, allClear: true})
+      ReasonReact.Update({...state, operation: Op_None, input: "", total, allClear: true})
     | UpdatedField(str) => ReasonReact.Update({...state, input: state.input ++ str})
     | Percent =>
       let input = ! isInputEmpty(state) ? state.input |> parseFloat |> string_of_float : "";
@@ -74,7 +80,7 @@ let make = (_children) => {
     | Sum =>
       ReasonReact.Update({
         ...state,
-        operation: "Sum",
+        operation: Op_Sum,
         total: state.total +. parseFloat(state.input),
         input: ""
       })
@@ -87,7 +93,7 @@ let make = (_children) => {
         } else {
           parseFloat(state.input)
         };
-      ReasonReact.Update({...state, operation: "Substract", total, input: ""})
+      ReasonReact.Update({...state, operation: Op_Substract, total, input: ""})
     | Multiply =>
       let total =
         if (! isInputEmpty(state)) {
@@ -97,7 +103,7 @@ let make = (_children) => {
         } else {
           state.lastCalculation
         };
-      ReasonReact.Update({...state, operation: "Multiply", total, input: ""})
+      ReasonReact.Update({...state, operation: Op_Multiply, total, input: ""})
     | Devide =>
       let total =
         if (! isInputEmpty(state)) {
@@ -107,36 +113,36 @@ let make = (_children) => {
         } else {
           state.lastCalculation
         };
-      ReasonReact.Update({...state, operation: "Devide", total, input: ""})
+      ReasonReact.Update({...state, operation: Op_Devide, total, input: ""})
     | Equals =>
       switch state.operation {
-      | "Sum" =>
+      | Op_Sum =>
         ReasonReact.Update({
           ...state,
-          operation: "",
+          operation: Op_None,
           total: state.total +. parseFloat(state.input),
           lastCalculation: state.total +. parseFloat(state.input),
           input: ""
         })
-      | "Substract" =>
+      | Op_Substract =>
         ReasonReact.Update({
           ...state,
           total: state.total -. parseFloat(state.input),
-          operation: "",
+          operation: Op_None,
           lastCalculation: state.total -. parseFloat(state.input),
           input: ""
         })
-      | "Multiply" =>
+      | Op_Multiply =>
         ReasonReact.Update({
           ...state,
           total: state.total *. parseFloat(state.input),
           lastCalculation: state.total *. parseFloat(state.input),
           input: ""
         })
-      | "Devide" =>
+      | Op_Devide =>
         ReasonReact.Update({
           ...state,
-          operation: "",
+          operation: Op_None,
           total: state.total /. parseFloat(state.input),
           lastCalculation: state.total /. parseFloat(state.input),
           input: ""
